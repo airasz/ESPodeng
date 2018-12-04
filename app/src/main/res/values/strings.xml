@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ESPodeng</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_rescan">Rescan Network</string>
+    <string name="action_exit">Exit</string>
+    <string name="action_restart">Restart app</string>
+</resources>
