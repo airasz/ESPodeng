@@ -1,5 +1,7 @@
 package chicken.head.espodeng;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<String> adapter;
     ArrayList<String> list;
     ArrayList<String>list2;
+    ArrayList<String>listh;
     public TextView tvlog;
     public TextView mltext;
     TextView tvip;
@@ -107,6 +110,7 @@ private Button btnScan;
     ArrayList<String> ipList;
 //    ArrayAdapter<String> adapter;
 
+    ClipboardManager clipboardManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +118,8 @@ private Button btnScan;
         toolbar = findViewById(R.id.toolbar);
 //        toolbar.setLogo(R.drawable.espradio);
         toolbar.setSubtitle("ESP radio controller");
+
+        clipboardManager=(ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
         typewakanda=Typeface.createFromAsset(getAssets(),"wakanda.ttf");
         setSupportActionBar(toolbar);
@@ -126,8 +132,12 @@ private Button btnScan;
         tvlog=findViewById(R.id.tvlog);
         tvip=findViewById(R.id.tv_ip);
         mltext=findViewById(R.id.mltext);
+
+
         list = new ArrayList<String>();
 
+//        spinnerhistory=findViewById(R.id.spinnerhistory);
+//        spinnerhistory.setAdapter();
         spinner = findViewById(R.id.spinner);
 
         list.add("select here");
@@ -142,6 +152,7 @@ private Button btnScan;
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (spinner.getSelectedItem().toString() != "select here") {
                     tvip.setText(spinner.getSelectedItem().toString());
+                    localip=spinner.getSelectedItem().toString();
                     getstatus(10000);//
 
                     toolbar.setSubtitle(spinner.getSelectedItem().toString().substring(1));
@@ -156,6 +167,26 @@ private Button btnScan;
             spinner.setVisibility(View.INVISIBLE);
         }
     });
+
+
+        spinnerhistory=findViewById(R.id.spinnerhistory);
+        ArrayAdapter<String>adapterh;
+
+        listh= new ArrayList<String>();
+        listh.add("recent command");
+        final customSpinnerAdapter csadapter_hystori=new customSpinnerAdapter(getApplicationContext(),listh);
+        spinnerhistory.setAdapter(csadapter_hystori);
+        spinnerhistory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                reqqueue(url);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        }) ;
 
         spinner2 = findViewById(R.id.spinner2);
 //        spinner2.setVisibility(View.INVISIBLE);
@@ -219,6 +250,37 @@ private Button btnScan;
         autoCompleteTextView.setAdapter(actv_adapter);
 
 
+        clipboardManager.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
+            @Override
+            public void onPrimaryClipChanged() {
+
+                ClipData clipData=clipboardManager.getPrimaryClip();
+                ClipData.Item item= clipData.getItemAt(0);
+                String cb=item.getText().toString();
+                try{
+                    if(cb.length()>8){
+                        if (cb.substring(0,8).equals("station=")){
+//                            cb=cb.substring(8);
+                            autoCompleteTextView.setText(cb);
+                            autoCompleteTextView.selectAll();
+                        }else if(cb.substring(0,4).equals("http")){
+                            autoCompleteTextView.setText("station="+cb);
+                            autoCompleteTextView.selectAll();
+                        }
+                    }
+                }catch (UnknownError e){
+                    e.printStackTrace();
+                }
+//                        editText.setHint(clipboardManager.getPrimaryClip().toString());
+//                autoCompleteTextView.setHint(cb);
+
+
+
+//                editText.setHint(clipboardManager.getPrimaryClip().toString());
+            }
+        });
+
+
         btnstation=findViewById(R.id.button);
         btnstation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -238,9 +300,20 @@ private Button btnScan;
 
                     url =start+localip.toString()+mid+autoCompleteTextView.getText().toString();
 //                    TextView tvlog=(TextView)findViewById(R.id.tvlog);
+
+//                        listh.add(autoCompleteTextView.getText().toString());
+                        csadapter_hystori.insert(autoCompleteTextView.getText().toString(),1);
+                        int insp=spinnerhistory.getAdapter().getCount();
+                        if(insp>4){
+//                            spinnerhistory.removeViewAt(4);
+                              csadapter_hystori.remove((String)spinnerhistory.getAdapter().getItem(5));
+                        }
+                        if(autoCompleteTextView.getText().toString().substring(0,7).equals("station")){
+
+                        }else {
+                            getstatus(10000);}
                     reqqueue(url);
                     localip=localip.toString();
-                    getstatus(10000);
                     ArrayAdapter<String> adapterh;
 
                     List<String> list2;
@@ -314,7 +387,7 @@ private Button btnScan;
                     if(autoCompleteTextView.getText().toString().substring(0,4).equals("reqp")){
                         listingpreset=true;
                     }
-
+                    listh.add(autoCompleteTextView.getText().toString());
                     reqqueue(url);
                     autoCompleteTextView.setText((autoCompleteTextView.getText().toString().substring(0,4)));
                     return true;
@@ -367,10 +440,12 @@ private Button btnScan;
         if(myips!=null){
 //            tvip.setText(myips.substring(1));
 //            tvip.setText(myips);
-            localip=myips;
             toolbar.setSubtitle(myips.substring(1));
+            localip=myips;
+//            toolbar.setTitle("ESPradio@"+myips.substring(1));
             String ping =start+localip.toString()+mid+"ping";                        // fist request is send ping
             reqqueue(ping);
+            Log.d("send", "send: ping");
         }
 
 
@@ -460,16 +535,19 @@ String lineindex;
     }
 
 
-    public void reqqueue(String urld){
+    public void reqqueue(final String urld){
 
         final RequestQueue queue = Volley.newRequestQueue(this);
         // Request a string response from the provided URL.
+
+//        mltext.setText(urld);
          StringRequest stringRequest = new StringRequest(Request.Method.GET, urld,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
                         response=response.replaceAll("\\s+$", "");
+                        Log.d("received", "received: "+response);
                         if (response.toString().equals("ESP")){
                             if(!firstping){                                                                                         //ip corectly set
                                 tvlog.setText("ESPradio ip already correctly set ");
@@ -524,11 +602,12 @@ String lineindex;
                 if(!firstping){
                     tvlog.setText("Scanning and list reachable network...");
                     new ScanIpTask().execute();
-                    tvip.setText("0.0.0.0");
-                    toolbar.setSubtitle("0.0.0.0");
 //                    firstping=true;
 
                 }else {
+
+//                    tvip.setText("0.0.0.0");
+//                    toolbar.setSubtitle("0.0.0.0");
                     tvlog.setText("Respon timeout.\nProbability wrong IP or Radio is offline");
 
                 }
@@ -958,6 +1037,7 @@ public void cekradio(boolean ceklagi){
 //                            Toast.makeText(MainActivity.this, "ESP responded in", Toast.LENGTH_LONG).show();
                             tvlog.setText("ESPradio detected on address " +tempip.substring(1) + " and set as your ip target" );
                             toolbar.setSubtitle(tempip.substring(1));
+                            localip=tempip;
 //                            getstatus(6000);
 
 
