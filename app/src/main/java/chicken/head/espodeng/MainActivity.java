@@ -1,5 +1,6 @@
 package chicken.head.espodeng;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,15 +28,18 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -77,9 +82,14 @@ public class MainActivity extends AppCompatActivity {
     //====preference
     public static final String MYPREF="mypref";
     public static final String MYIP="myip";
+    public static final String NUANSA= "nuansa";
+    public static final String RNDCOLSTATE= "rndcolstate";
+
     public static SharedPreferences sharedPreferences=null;
 
     public static Typeface typewakanda;
+
+    public static Boolean random_color_state=false;
 
 
 
@@ -87,6 +97,24 @@ public class MainActivity extends AppCompatActivity {
     final String mid=new String("/?");
     final String start=new String("http:/");
     String url;
+
+
+    public static  int rColor;
+//    public static Typeface typeface;
+    public static int headColor;
+
+
+    Context context =this ;
+
+
+    public static String   s_gateway;
+    DhcpInfo d;
+    WifiManager wifii;
+
+
+//    public static SharedPreferences sharedpreferences=null;
+
+
     int indexipspinner;
     Spinner spinner;
     Spinner spinner2;
@@ -119,7 +147,32 @@ private Button btnScan;
 //        toolbar.setLogo(R.drawable.espradio);
         toolbar.setSubtitle("ESP radio controller");
 
+        loadPreference();
         clipboardManager=(ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        wifii= (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        d=wifii.getDhcpInfo();
+        s_gateway=String.valueOf(Formatter.formatIpAddress(d.gateway));
+
+//        Toast.makeText(MainActivity.this, s_gateway , Toast.LENGTH_LONG).show();
+
+
+        if (random_color_state==true){
+            rColor= custom.getRandomColore();
+        }else{
+            rColor=sharedPreferences.getInt(NUANSA,rColor);
+        }
+        LayoutInflater inflater=((Activity)context).getLayoutInflater();
+//        LayoutInflater inflater1=(Activity)
+//        View layout = inflater.inflate(R.layout.spinner_row,ViewGroup,false);
+//        LinearLayout ll=(LinearLayout)layout.findViewById(R.id.toast_view);
+//        RelativeLayout rlspinner=layout.findViewById(R.id.csspinner_bg);
+//        TextView textView = layout.findViewById(R.id.tvCategory);
+//        textView.setBackgroundColor(Color.GREEN);
+//
+//        rlspinner.setBackgroundColor(Color.GREEN);
+//
+//        AppBarLayout appBarLayout=findViewById(R.id.appbar);
+//        appBarLayout.setBackgroundColor(rColor);
 
         typewakanda=Typeface.createFromAsset(getAssets(),"wakanda.ttf");
         setSupportActionBar(toolbar);
@@ -132,6 +185,20 @@ private Button btnScan;
         tvlog=findViewById(R.id.tvlog);
         tvip=findViewById(R.id.tv_ip);
         mltext=findViewById(R.id.mltext);
+        mltext.setVisibility(View.INVISIBLE);
+
+
+        if(myips!=null){
+//            tvip.setText(myips.substring(1));
+//            tvip.setText(myips);
+            toolbar.setSubtitle(myips.substring(1));
+            localip=myips;
+            Log.d("error", "myips = "+myips);
+//            toolbar.setTitle("ESPradio@"+myips.substring(1));
+            String ping =start+localip.toString()+mid+"ping";                        // fist request is send ping
+            reqqueue(ping);
+            Log.d("send", "send: ping");
+        }else {localip="0.0.0.0";}
 
 
         list = new ArrayList<String>();
@@ -282,9 +349,11 @@ private Button btnScan;
 
 
         btnstation=findViewById(R.id.button);
+        btnstation.setVisibility(View.INVISIBLE);
         btnstation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if(numbpreset!=""){
                     url =start+localip.toString()+mid+"";
                 }
@@ -383,14 +452,18 @@ private Button btnScan;
         autoCompleteTextView.setOnKeyListener(new EditText.OnKeyListener(){
             public boolean onKey (View view,  int keyCode, KeyEvent event){
                 if (event.getAction()==KeyEvent.ACTION_DOWN &&keyCode== KeyEvent.KEYCODE_ENTER){
-                    url =start+localip.toString()+mid+autoCompleteTextView.getText().toString();
+                    url =start+localip.toString()+mid+autoCompleteTextView.getText().toString().toLowerCase();
                     if(autoCompleteTextView.getText().toString().substring(0,4).equals("reqp")){
                         listingpreset=true;
                     }
-                    listh.add(autoCompleteTextView.getText().toString());
+                    listh.add(autoCompleteTextView.getText().toString().toLowerCase());
                     reqqueue(url);
-                    autoCompleteTextView.setText((autoCompleteTextView.getText().toString().substring(0,4)));
+//                    autoCompleteTextView.setText((autoCompleteTextView.getText().toString().substring(0,4)));
+                    autoCompleteTextView.setText("");
                     return true;
+                }
+                if(event.getAction()==KeyEvent.ACTION_DOWN){
+                    autoCompleteTextView.setText(autoCompleteTextView.getText().toString().toLowerCase());
                 }
                 return false;
             }
@@ -436,18 +509,6 @@ private Button btnScan;
                         .setAction("Action", null).show();
             }
         });
-        loadPreference();
-        if(myips!=null){
-//            tvip.setText(myips.substring(1));
-//            tvip.setText(myips);
-            toolbar.setSubtitle(myips.substring(1));
-            localip=myips;
-//            toolbar.setTitle("ESPradio@"+myips.substring(1));
-            String ping =start+localip.toString()+mid+"ping";                        // fist request is send ping
-            reqqueue(ping);
-            Log.d("send", "send: ping");
-        }
-
 
 
     }
@@ -601,7 +662,7 @@ String lineindex;
             public void onErrorResponse(VolleyError error) {
                 if(!firstping){
                     tvlog.setText("Scanning and list reachable network...");
-                    new ScanIpTask().execute();
+//                    new ScanIpTask().execute();
 //                    firstping=true;
 
                 }else {
@@ -667,7 +728,10 @@ super.onStart();
 
         sharedPreferences = getSharedPreferences(MYPREF, Context.MODE_PRIVATE);
         myips= sharedPreferences.getString(MYIP, myips);
-
+        if(rColor!=0){
+            rColor=sharedPreferences.getInt(NUANSA,rColor);
+        }
+        random_color_state=sharedPreferences.getBoolean(RNDCOLSTATE,random_color_state);
         makeText(this, myips,Toast.LENGTH_SHORT);
 
 
@@ -758,6 +822,9 @@ super.onStart();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            startActivity(new Intent(MainActivity.this, AturActivity.class));
+            //return true ;
             return true;
         }
         if (id == R.id.action_rescan) {
@@ -808,6 +875,7 @@ super.onStart();
     private class ScanIpTask extends AsyncTask<Void, String, Void> {
 
         static final String subnet = "192.168.0.";
+        final String getway=s_gateway.substring(0,10);
         static final String subnet2 = "192.168.1.";
         Boolean route_type1=true;
         Boolean route_type2=true;
@@ -820,85 +888,88 @@ super.onStart();
         protected void onPreExecute() {
             DhcpInfo d;
             WifiManager wifii;
-            wifii= (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            WifiInfo wifiInfo=wifii.getConnectionInfo();
-            String subnett=
+//            wifii= (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//            WifiInfo wifiInfo=wifii.getConnectionInfo();
+//            String subnett=
 
-            wfaddr=Formatter.formatIpAddress(wifii.getConnectionInfo().getIpAddress());
-            d=wifii.getDhcpInfo();
-            int gatewayip = d.gateway;
+//            wfaddr=Formatter.formatIpAddress(wifii.getConnectionInfo().getIpAddress());
+//            d=wifii.getDhcpInfo();
+//            int gatewayip = d.gateway;
 //            tvGateway.setText(Formatter.formatIpAddress(dhcpInfo.gateway));
 //            Toast.makeText(MainActivity.this, "Scan IP of "+gatewayip , Toast.LENGTH_LONG).show();
             if(!firstping){
                 //tvlog.setText("scanning network...");
 
             }
-            Toast.makeText(MainActivity.this, wfaddr , Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity.this, wfaddr , Toast.LENGTH_LONG).show();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
+            for (int i = 0; i <= 15; i++) {
+                String host = getway + i;
 
-            if(route_type1==true){
-                for (int i = 0; i <= 15; i++) {
-                    String host = subnet + i;
-
-                    try {
-                        InetAddress inetAddress = InetAddress.getByName(host);
-                        if (inetAddress.isReachable(timeout)){
-                            if(i==1){
-                                if(inetAddress.toString().equals("/192.168.0.1")){
+                try {
+                    InetAddress inetAddress = InetAddress.getByName(host);
+                    if (inetAddress.isReachable(timeout)){
+                        if(i==1){
+                            if(inetAddress.toString().equals("/192.168.0.1")){
 //                                    route_type1=true;
 //                                    route_type2=false;
-                                }else{
+                            }else{
 //                                    route_type1=false;
 //                                    route_type2=true;
-                                }
                             }
-
-                            publishProgress(inetAddress.toString());
                         }
 
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        publishProgress(inetAddress.toString());
                     }
+
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-            if(route_type2==true){
-                for (int i = 0; i <= 5; i++) {
-                    String host = subnet2 + i;
 
-                    try {
-                        InetAddress inetAddress = InetAddress.getByName(host);
-                        //hostname = inetAddress.getHostName();
-                        if (inetAddress.isReachable(timeout)){
-//                        if (inetAddress.toString()!=wfaddr){
+
+
+//            if(route_type1==true){
 //
+//            }
+//            if(route_type2==true){
+//                for (int i = 0; i <= 5; i++) {
+//                    String host = subnet2 + i;
+//
+//                    try {
+//                        InetAddress inetAddress = InetAddress.getByName(host);
+//                        //hostname = inetAddress.getHostName();
+//                        if (inetAddress.isReachable(timeout)){
+////                        if (inetAddress.toString()!=wfaddr){
+////
+////                        }
+//                            if(i==1){
+//                                if(inetAddress.toString().equals("/192.168.1.1")){
+////                                    route_type1=false;
+////                                    route_type2=true;
+////                        Toast.makeText(MainActivity.this, "route type = 2", Toast.LENGTH_SHORT).show();
+//                                }else if(inetAddress.toString().equals("/192.168.0.1")){
+////                                    route_type1=true;
+////                                    route_type2=false;
+////                        Toast.makeText(MainActivity.this, "route type = 2", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                            publishProgress(inetAddress.toString());
+////                        Toast.makeText(MainActivity.this, inetAddress.toString(), Toast.LE    NGTH_SHORT).show();
 //                        }
-                            if(i==1){
-                                if(inetAddress.toString().equals("/192.168.1.1")){
-//                                    route_type1=false;
-//                                    route_type2=true;
-//                        Toast.makeText(MainActivity.this, "route type = 2", Toast.LENGTH_SHORT).show();
-                                }else if(inetAddress.toString().equals("/192.168.0.1")){
-//                                    route_type1=true;
-//                                    route_type2=false;
-//                        Toast.makeText(MainActivity.this, "route type = 2", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                            publishProgress(inetAddress.toString());
-//                        Toast.makeText(MainActivity.this, inetAddress.toString(), Toast.LE    NGTH_SHORT).show();
-                        }
-
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+//
+//                    } catch (UnknownHostException e) {
+//                        e.printStackTrace();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
 
 
             return null;
@@ -936,7 +1007,7 @@ super.onStart();
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            indexipspinner=spinner.getAdapter().getCount();
+            indexipspinner=spinner.getAdapter().getCount()-1;
             if(!firstping){
 
                 tvlog.setText("Listing complete\nFiinding ESP radio ip.....");
@@ -961,12 +1032,12 @@ int ipasc;
 public void detectradioip(int ipcount){
 //    Toast.makeText(MainActivity.this, "detectradioip executed", Toast.LENGTH_SHORT).show();
 
-    Toast.makeText(MainActivity.this, "total index "+ ipcount, Toast.LENGTH_SHORT).show();
+//    Toast.makeText(MainActivity.this, "total index "+ ipcount, Toast.LENGTH_SHORT).show();
     for( ipasc = 1; ipasc < ipcount; ipasc++){
         try {
 
             tempip=(spinner.getItemAtPosition(ipasc).toString());
-            Toast.makeText(MainActivity.this, "index no " + ipasc+ "of "+ ipcount + " | ip :" + tempip, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "index no " + ipasc+ "of "+ ipcount + " | ip :" + tempip, Toast.LENGTH_SHORT).show();
 //                    reqqueue("http:/"+tempip+"/?ping");
             Thread.sleep(2000);
         }catch (Exception e){
@@ -999,23 +1070,38 @@ public void detectradioip(int ipcount){
 
 public void cekradio(boolean ceklagi){
     if (ceklagi){
-        if(indexipspinner>2){
-            itempos++;
-            if(itempos<=indexipspinner) {
-                try{
+        if(indexipspinner==0){
+            return;
+        }else {
 
-                    tempip = (spinner.getItemAtPosition(itempos).toString());
+//            Toast.makeText(MainActivity.this, "indexofspinner="+indexipspinner, Toast.LENGTH_LONG).show();
+            Log.d("index","indexofspinner= "+indexipspinner);
+            if(indexipspinner>2){
+                itempos++;
+                if(itempos<=indexipspinner) {
+                    try{
 
-                }catch (UnknownError e){
-                    e.printStackTrace();
-                }
+                        Log.d("spinner","position spinner "+itempos+"  contain = "+(spinner.getItemAtPosition(itempos).toString()));
+                        tempip = (spinner.getItemAtPosition(itempos).toString());
+
+
+                    }catch (UnknownError e){
+                        e.printStackTrace();
+                    }
 //            Toast.makeText(MainActivity.this, "tempip="+tempip, Toast.LENGTH_LONG).show();
-                reqradiorespon("http:/" + tempip + "/?ping");
-            }
+                    reqradiorespon("http:/" + tempip + "/?ping");
+                }
             }else {
+//            return;
                 ceklagi=false;
                 tvlog.setText("");
+
             }
+
+        }
+
+
+
         }
 
 
@@ -1056,7 +1142,9 @@ public void cekradio(boolean ceklagi){
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (itempos==indexipspinner){
-                tvlog.setText("looks like no ESPradio detected.");}
+                tvlog.setText("looks like no ESPradio detected.");
+                toolbar.setSubtitle("0.0.0.0");
+                }
                 cekradio(true);
                 firstping=true;
             }

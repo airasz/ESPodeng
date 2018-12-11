@@ -28,4 +28,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.mcxiaoke.volley:library:1.0.17'
     implementation 'me.philio:preferencecompatextended:1.2.2'
+
+   implementation 'com.readystatesoftware.systembartint:systembartint:1.0.3'
+    implementation 'com.github.yukuku:ambilwarna:2.0.1'
 }

@@ -145,7 +145,6 @@
                         android:imeActionLabel="fire"
                         android:imeOptions="actionSend"
                         android:inputType="none|text|textMultiLine|textImeMultiLine"
-                        android:marqueeRepeatLimit="marquee_forever"
                         android:singleLine="false"
                         android:textColor="@android:color/holo_green_light"
                         android:textColorHint="@color/textColorHint" />

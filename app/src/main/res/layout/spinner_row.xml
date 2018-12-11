@@ -4,9 +4,9 @@
     android:id="@+id/csspinner_bg"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/holo_red_dark"
+    android:background="#5423a9"
     android:orientation="vertical"
-    tools:background="@android:color/holo_red_dark">
+    tools:background="#5423a9">
 
     <TextView
         android:id="@+id/tvCategory"

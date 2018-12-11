@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 // Custom Adapter for Spinner
@@ -43,7 +44,8 @@ public class customSpinnerAdapter extends ArrayAdapter<String> {
     public View getCustomView(int position, View convertView, ViewGroup parent) {
 
         View row = inflater.inflate(R.layout.spinner_row, parent, false);
-
+        RelativeLayout relativeLayout=row.findViewById(R.id.csspinner_bg);
+        relativeLayout.setBackgroundColor(MainActivity.rColor);
         TextView tvCategory = (TextView) row.findViewById(R.id.tvCategory);
 
         tvCategory.setText(data.get(position).toString());
