@@ -178,12 +178,10 @@ private Button btnScan;
         setSupportActionBar(toolbar);
         TextView tvvol=findViewById(R.id.textView3);
         TextView tvips=findViewById(R.id.textView);
-        tvips.setTypeface(typewakanda);
         tvvol.setTypeface(typewakanda);
         tvvol.setText("quick volume");
 
         tvlog=findViewById(R.id.tvlog);
-        tvip=findViewById(R.id.tv_ip);
         mltext=findViewById(R.id.mltext);
         mltext.setVisibility(View.INVISIBLE);
 
@@ -218,7 +216,7 @@ private Button btnScan;
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (spinner.getSelectedItem().toString() != "select here") {
-                    tvip.setText(spinner.getSelectedItem().toString());
+                    //tvip.setText(spinner.getSelectedItem().toString());
                     localip=spinner.getSelectedItem().toString();
                     getstatus(10000);//
 
@@ -688,6 +686,12 @@ super.onStart();
 //        loadPreference();
 //        makeText(this, "aaa", Toast.LENGTH_LONG);
 //        TextView tvip=findViewById(R.id.tv_ip);
+
+        if (random_color_state==true){
+            rColor= custom.getRandomColore();
+        }else{
+//            rColor=sharedPreferences.getInt(NUANSA,rColor);
+        }
         if(!firstping){
             getstatus(5000);
 
@@ -740,7 +744,7 @@ super.onStart();
 
     private void save_pref(){
         SharedPreferences.Editor editor=sharedPreferences.edit();
-        TextView tvip=findViewById(R.id.tv_ip);
+        //TextView tvip=findViewById(R.id.tv_ip);
         editor.putString(MYIP, localip.toString());
         editor.commit();
     }
@@ -759,7 +763,7 @@ super.onStart();
                 //System.exit(0);
                 return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
-                 tvip=findViewById(R.id.tv_ip);
+                 //tvip=findViewById(R.id.tv_ip);
                 url =start+localip.toString()+mid+"upvolume=2";
                 reqqueue(url);
                 localip=localip.toString();
@@ -767,7 +771,7 @@ super.onStart();
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
 
-                 tvip=findViewById(R.id.tv_ip);
+                 //tvip=findViewById(R.id.tv_ip);
                 url =start+localip.toString()+mid+"downvolume=2";
                 reqqueue(url);
                 localip=localip.toString();
@@ -1119,7 +1123,7 @@ public void cekradio(boolean ceklagi){
                         // Display the first 500 characters of the response string.
                         response=response.replaceAll("\\s+$", "");
                         if (response.toString().equals("ESP")){
-                            tvip.setText(tempip);
+                            //tvip.setText(tempip);
 //                            Toast.makeText(MainActivity.this, "ESP responded in", Toast.LENGTH_LONG).show();
                             tvlog.setText("ESPradio detected on address " +tempip.substring(1) + " and set as your ip target" );
                             toolbar.setSubtitle(tempip.substring(1));
