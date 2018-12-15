@@ -71,7 +71,7 @@
                     android:layout_weight="1"
                     android:background="@android:color/background_dark"
                     android:fontFamily="serif-monospace"
-                    android:text="TextView"
+                    android:text="please wait......"
                     android:textColor="@android:color/holo_green_light" />
             </LinearLayout>
 
@@ -90,6 +90,8 @@
                     android:animateLayoutChanges="false"
                     android:background="@android:color/holo_blue_dark"
                     android:foreground="@android:color/holo_green_light"
+                    android:padding="2dip"
+                    android:splitMotionEvents="true"
                     android:theme="@android:style/TextAppearance.Widget.TextView.SpinnerItem"
                     tools:layout_editor_absoluteX="8dp"
                     tools:layout_editor_absoluteY="32dp"
@@ -146,20 +148,20 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_marginTop="10dip"
-                android:background="@android:color/holo_blue_dark"
+                android:background="#bed0d6"
                 android:orientation="horizontal"
                 android:visibility="visible">
 
                 <Spinner
                     android:id="@+id/spinner2"
-                    style="@android:style/Widget.Holo.Spinner"
                     android:layout_width="332dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="false"
                     android:layout_weight="1"
                     android:background="@android:color/holo_blue_dark"
+                    android:padding="2dip"
                     android:saveEnabled="true"
-                    android:theme="@android:style/Widget.DeviceDefault.Light.Spinner"
+                    android:theme="@android:style/TextAppearance.Widget.TextView.SpinnerItem"
                     tools:background="@color/colorPrimary"
                     tools:layout_editor_absoluteX="8dp"
                     tools:layout_editor_absoluteY="32dp" />
@@ -297,6 +299,28 @@
 
 
             </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/seekBarvol"
+                    style="@android:style/Widget.DeviceDefault.Light.SeekBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="50" />
+
+                <TextView
+                    android:id="@+id/tvolume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@android:color/holo_green_light" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
