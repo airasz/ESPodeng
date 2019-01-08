@@ -93,26 +93,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static Boolean random_color_state=false;
     Integer volnumb;
 
-
     int itempos=0;
     final String mid=new String("/?");
     final String start=new String("http:/");
     String url;
 
-
     public static  int rColor;
 //    public static Typeface typeface;
     public static int headColor;
-
 
     Context context =this ;
 
     public static String   s_gateway;
     DhcpInfo d;
     WifiManager wifii;
-
-
-//    public static SharedPreferences sharedpreferences=null;
 
     int packetnum=0;
 
@@ -137,13 +131,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Boolean b_scannetwork=false;
     Boolean b_getsync=false;
     Boolean dontselectspinner=false;
-// ip scanner
-private Button btnScan;
+
+    private Button btnScan;
     private ListView listViewIp;
 
     ArrayList<String> ipList;
-//    ArrayAdapter<String> adapter;
-
     ClipboardManager clipboardManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,13 +199,9 @@ private Button btnScan;
             Log.d("send", "send: ping");
         }else {localip="0.0.0.0";}
 
-
+        //==== spinnner listed IP======
         list = new ArrayList<String>();
-
-//        spinnerhistory=findViewById(R.id.spinnerhistory);
-//        spinnerhistory.setAdapter();
         spinner = findViewById(R.id.spinner);
-
         list.add("select here");
         customSpinnerAdapter csadapter=new customSpinnerAdapter(getApplicationContext(), list);
         adapter = new ArrayAdapter<String>(getApplicationContext(),
@@ -226,7 +214,6 @@ private Button btnScan;
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (spinner.getSelectedItem().toString() != "select here") {
-                    //tvip.setText(spinner.getSelectedItem().toString());
                     localip=spinner.getSelectedItem().toString();
                     getstatus(10000);//
 
@@ -236,17 +223,17 @@ private Button btnScan;
                 }
             }
 
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
             spinner.setVisibility(View.INVISIBLE);
         }
-    });
+        });
 
 
+
+        //=====spinner command history========
         spinnerhistory=findViewById(R.id.spinnerhistory);
         ArrayAdapter<String>adapterh;
-
         listh= new ArrayList<String>();
         listh.add("command history");
         final customSpinnerAdapter csadapter_hystori=new customSpinnerAdapter(getApplicationContext(),listh);
@@ -266,15 +253,12 @@ private Button btnScan;
             }
         }) ;
 
-        spinner2 = findViewById(R.id.spinner2);
-//        spinner2.setVisibility(View.INVISIBLE);
+        //=====spinner list preset==========
+        spinner2 = findViewById(R.id.spinner2);//        spinner2.setVisibility(View.INVISIBLE);
         ArrayAdapter<String> adapter2;
-//        List<String> list2;
         list2 = new ArrayList<String>();
         list2.add("select preset");
-
         customSpinnerAdapter csadapter_station=new customSpinnerAdapter(getApplicationContext(), list2);
-//        csadapter_station.setDropDownViewTheme(R)
         adapter2 = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_spinner_item, list2);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -317,13 +301,11 @@ private Button btnScan;
         });
 
 
-
+        //======auto complete textview===
         final AutoCompleteTextView autoCompleteTextView =findViewById(R.id.autoCompleteTextView);
         ArrayAdapter<String> actv_adapter;
         List<String> list3;
         list3 = new ArrayList<String>();
-//        list3.add("volume=");
-//        list3.add("preset=");
         list3.add("stop");
         list3.add("station=");
         list3.add("ip=");
@@ -339,7 +321,7 @@ private Button btnScan;
         actv_adapter=new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, list3);
         autoCompleteTextView.setAdapter(actv_adapter);
 
-
+        //=======handle clipboard grabing=====
         clipboardManager.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
@@ -399,36 +381,26 @@ private Button btnScan;
             }
         });
         ImageButton ibtn_send=findViewById(R.id.ibtn_send);
+        final int maximumhistory=4;
         ibtn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                if((autoCompleteTextView.getText().toString()!=" ")&&((autoCompleteTextView.getText().toString()).substring(0,3) !="ip=")){
-
-                    if((autoCompleteTextView.getText().toString()!=" ")){
-
-                    url =start+localip.toString()+mid+autoCompleteTextView.getText().toString();
-//                    TextView tvlog=(TextView)findViewById(R.id.tvlog);
-
-//                        listh.add(autoCompleteTextView.getText().toString());
+                    if((autoCompleteTextView.getText().toString()!="")){
+                        url =start+localip.toString()+mid+autoCompleteTextView.getText().toString();
                         csadapter_hystori.insert(autoCompleteTextView.getText().toString(),1);
                         int insp=spinnerhistory.getAdapter().getCount();
-                        if(insp>4){
-//                            spinnerhistory.removeViewAt(4);
-                              csadapter_hystori.remove((String)spinnerhistory.getAdapter().getItem(5));
+                        if(insp>maximumhistory){
+                            csadapter_hystori.remove((String)spinnerhistory.getAdapter().getItem(5));                       //remove oldest command history
                         }
-//                        if(autoCompleteTextView.getText().toString().substring(0,7).equals("station")){
-//
-//                        }else {
-//                            getstatus(10000);}
-                    reqqueue(url);
-                    localip=localip.toString();
-                    ArrayAdapter<String> adapterh;
+                        reqqueue(url);
 
-                    List<String> list2;
-                    list2 = new ArrayList<String>();
-                    list2.add(url);
-//                    adapterh=new ArrayAdapter<>()
-                    autoCompleteTextView.setText("");
+                        localip=localip.toString();
+                        ArrayAdapter<String> adapterh;
+                        List<String> list2;
+                        list2 = new ArrayList<String>();
+                        list2.add(url);
+                        autoCompleteTextView.setText("");
                 }
             }
         });
@@ -442,7 +414,7 @@ private Button btnScan;
             public void onClick(View view) {
                 url =start+localip.toString()+mid+"downpreset=1";
                 reqqueue(url);
-                localip=localip.toString();
+//                localip=localip.toString();
                 getstatus(5000);
             }
         });
@@ -538,8 +510,7 @@ private Button btnScan;
             }
 
         });
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+        FloatingActionButton fab =findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -552,9 +523,6 @@ private Button btnScan;
 
 
     }
-//    public boolean onEditorAction(TextView netpreset, int action,KeyEvent event){
-//
-//    }
 
     private void ceksdcard() {
         String state = Environment.getExternalStorageState();
@@ -635,7 +603,7 @@ private Button btnScan;
 
                                         }
                                     }
-                                    b_getsync=false;
+                                    b_getsync=true;
 //                                    if(!b_scannetwork){
 //                                        new ScanIpTask().execute();                                                             //filling spinner 1 with all available ip
 //                                    }
@@ -699,7 +667,7 @@ private Button btnScan;
 
 //                    tvip.setText("0.0.0.0");
 //                    toolbar.setSubtitle("0.0.0.0");
-                    tvlog.setText("Respon timeout.\nProbability wrong IP or Radio is offline");
+                    tvlog.setText("Respond timeout.\nProbability wrong IP or Radio is offline");
 
                 }
 
@@ -837,7 +805,7 @@ super.onStart();
         }
     }
 
-private void getsync(int delay){
+    private void getsync(int delay){
 
 
     final Handler handler = new Handler();
@@ -877,8 +845,6 @@ private void getsync(int delay){
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -941,29 +907,11 @@ private void getsync(int delay){
 
     private class ScanIpTask extends AsyncTask<Void, String, Void> {
 
-        static final String subnet = "192.168.0.";
         final String getway=s_gateway.substring(0,10);
-        static final String subnet2 = "192.168.1.";
-        Boolean route_type1=true;
-        Boolean route_type2=true;
-        static final int lower = 100;
-        static final int upper = 110;
         static final int timeout = 500;
         String wfaddr;
-        String hostname;
         @Override
         protected void onPreExecute() {
-            DhcpInfo d;
-            WifiManager wifii;
-//            wifii= (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-//            WifiInfo wifiInfo=wifii.getConnectionInfo();
-//            String subnett=
-
-//            wfaddr=Formatter.formatIpAddress(wifii.getConnectionInfo().getIpAddress());
-//            d=wifii.getDhcpInfo();
-//            int gatewayip = d.gateway;
-//            tvGateway.setText(Formatter.formatIpAddress(dhcpInfo.gateway));
-//            Toast.makeText(MainActivity.this, "Scan IP of "+gatewayip , Toast.LENGTH_LONG).show();
             if(!firstping){
                 //tvlog.setText("scanning network...");
 
@@ -975,30 +923,17 @@ private void getsync(int delay){
         protected Void doInBackground(Void... params) {
             for (int i = 0; i <= 15; i++) {
                 String host = getway + i;
-
                 try {
                     InetAddress inetAddress = InetAddress.getByName(host);
                     if (inetAddress.isReachable(timeout)){
-                        if(i==1){
-                            if(inetAddress.toString().equals("/192.168.0.1")){
-//                                    route_type1=true;
-//                                    route_type2=false;
-                            }else{
-//                                    route_type1=false;
-//                                    route_type2=true;
-                            }
-                        }
-
                         publishProgress(inetAddress.toString());
                     }
-
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-
             return null;
         }
 
@@ -1006,9 +941,9 @@ private void getsync(int delay){
         protected void onProgressUpdate(String... values) {
             // blacklist own IP
             String s=values[0];
-            if (values[0].equals("/192.168.0.1")){return; }                 //blacklist router type 1(repeater) from list
-            if (values[0].equals("/192.168.1.1")){return;}                  //blacklist router type main from list
-
+//            if (values[0].equals("/192.168.0.1")){return; }                 //blacklist router type 1(repeater) from list
+//            if (values[0].equals("/192.168.1.1")){return;}                  //blacklist router type main from list
+            if(values[0].equals(getway+"1")){return;}
             if (values[0].equals(wfaddr)){return;}                              //blacklist own IP from list
             list.add(values[0]);
             gethostname(wfaddr);
@@ -1050,8 +985,8 @@ private void getsync(int delay){
 
 
     }//end of ipscan class
-int ipasc;
-public void detectradioip(int ipcount){
+    int ipasc;
+    public void detectradioip(int ipcount){
 //    Toast.makeText(MainActivity.this, "detectradioip executed", Toast.LENGTH_SHORT).show();
 
 //    Toast.makeText(MainActivity.this, "total index "+ ipcount, Toast.LENGTH_SHORT).show();
@@ -1090,7 +1025,7 @@ public void detectradioip(int ipcount){
     }
 }
 
-public void cekradio(boolean ceklagi){
+    public void cekradio(boolean ceklagi){
     if (ceklagi){
         if(indexipspinner==0){
             return;
